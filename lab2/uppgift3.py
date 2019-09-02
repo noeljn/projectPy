@@ -1,8 +1,9 @@
-i = 1
-sum = 0
+i = 1 #Count for while
+sum = 0 # Summan av alla pakets kostnad
 antal_paket = int(input("Hur många paket vill du skicka: "))
 
-while i <= antal_paket:
+# Summerar alla pakets priser
+while i <= antal_paket: 
     print("Ange vikt för paket", i, ": ", end="" )
     vikt = float(input(""))
     if vikt < 2:
@@ -14,4 +15,4 @@ while i <= antal_paket:
     else: 
         sum += (vikt*23)
     i+=1
-print("Det kommer att kosta", round(sum,1), "Kr")
+print("Det kommer att kosta", round(sum,1), "Kr") # Skriver ut priset för alla paket

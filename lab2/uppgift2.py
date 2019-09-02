@@ -1,3 +1,4 @@
+#Räknar ut hur mycket ett paket kostar, via en if statment
 vikt = float(input("Hur mycket väger paketet: "))
 if vikt < 2:
     print("Det kommer att kosta ", round(vikt*30,2), "Kr")
