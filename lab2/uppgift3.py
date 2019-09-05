@@ -6,7 +6,7 @@ antal_paket = int(input("Hur många paket vill du skicka: "))
 while i <= antal_paket: 
     print("Ange vikt för paket", i, ": ", end="" )
     vikt = float(input(""))
-    if vikt < 2:
+    if vikt < 2 and vikt > 0:
         sum += (vikt*30)
     elif vikt >= 2 and vikt < 6:
         sum += (vikt*28)
