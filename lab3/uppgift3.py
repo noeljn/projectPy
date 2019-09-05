@@ -1,4 +1,4 @@
- import random
+import random
 
 dice = int(input("Hur många tärningar? "))
 throws = int(input("Hur många kast? "))
