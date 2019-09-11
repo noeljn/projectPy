@@ -14,6 +14,7 @@ while count_rader <= rader:
     count_kolumner = 1
     while count_kolumner <= kolumner:
         tal = count_kolumner*count_rader
+        a = 2
         print("{0:<2d}".format(tal), end=" ")
         count_kolumner += 1
     count_rader += 1
