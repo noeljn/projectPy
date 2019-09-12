@@ -19,7 +19,7 @@ def mainMenu(tv1,tv2):
             die()
         
 def tvInfo(tv):
-    print(tv.name, "\nKanal:", tv.getKanal(), "\nLjudvolymen:", tv.getVolym())
+    print("\n\n" + tv.name, "\nKanal:", tv.getKanal(), "\nLjudvolymen:", tv.getVolym())
 
 def secMenu(tv1,tv2,currentTv):
     inputNumber = 0
