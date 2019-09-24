@@ -1,8 +1,8 @@
 class tv:
 
-    def __init__(self, name):
-        self.kanal = 1
-        self.volym = 5
+    def __init__(self, name, kanal = None, volym = None):
+        self.kanal = kanal or 1
+        self.volym = volym or 5
         self.name = name
 
     def bytKanal(self, x):
