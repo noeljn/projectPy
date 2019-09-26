@@ -1,6 +1,6 @@
 import apparatus
 
-try:
+try: #Imports the settings from settings (if there are any)
     f = open("settings.txt", "r")
     if f.mode == "r":
         content = f.read()
@@ -14,75 +14,67 @@ except:
     vardag = apparatus.tv("Vardagsrums TV")
     kok = apparatus.tv("Köks TV")
 
-
-def main():
-    mainMenu()
-
 def mainMenu():
     inputNumber = 0
-    print("1.", vardag.name, "\n2.", kok.name,"\n3. Avsluta")
+    print("\n1.", vardag.name, "\n2.", kok.name,"\n3. Avsluta\nVälj: ", end="")
     while inputNumber != 3:
-        try:
-            print("Välj: ", end="")
-            inputNumber = int(input())
-            if inputNumber == 1:
-                secMenu(vardag)
-            elif inputNumber == 2:
-                secMenu(kok)
-            elif inputNumber == 3:
-                saveSettings()
-            else:
-                print("Välj ett nummer som finns!\n")
-                continue
-        except:
-            print("Välj ett nummer!\n")
+        try:    
+            inputNumber = int(input()) 
+        except ValueError: #Checks for Value error
+            print("Välj ett nummer! : ", end="")
+            continue
+        if inputNumber == 1:
+            secMenu(vardag)
+        elif inputNumber == 2:
+            secMenu(kok)
+        elif inputNumber == 3:
+            saveSettings()
+        else:
+            print("Välj ett nummer som finns! : ", end="")
             continue
 
-def secMenu(currentTv):
+def secMenu(currentTv): #Handels the second menu
     inputNumber = 0
-    while inputNumber != 4:
+    while inputNumber != 4: #The menu runs as long as you dont input "4"
         tvInfo(currentTv)
         print("\n\n1. Byt kanal\n2. Sänk ljudvolym\n3. Höj ljudvolym\n4. Gå till huvudmenyn\nVälj: ", end="")
         while True:
             try:
                 inputNumber = int(input())
-                print(inputNumber)
-                if inputNumber == 1:
-                    while True:
-                        print("Ange kanal nummer: ", end="")
-                        try:
-                            kanal = int(input())
-                            if kanal > 0 and kanal < 100:
-                                currentTv.bytKanal(kanal)
-                            else:
-                                print("Ange en kanal som finns!\n")
-                                continue
-                            break
-                        except:
+            except ValueError: #Checks for Value errors
+                print("Välj ett nummer! : ", end="")
+                continue
+            if inputNumber == 1: #Handels input from user 
+                while True: #Loops until a new kanal has been selected
+                    print("Ange kanal nummer: ", end="")
+                    try:
+                        kanal = int(input())
+                        if kanal > 0 and kanal < 100:
+                            currentTv.bytKanal(kanal)
+                        else:
                             print("Ange en kanal som finns!\n")
                             continue
-                elif inputNumber == 2:
-                    currentTv.sankVolym()
-                elif inputNumber == 3:
-                    currentTv.hojVolym()
-                elif inputNumber == 4:
-                    mainMenu()
-                else:
-                    print("Välj ett nummer som finns!\nVälj: ", end="")
-                    continue
-                break
-            except:
-                print("Välj ett nummer!\nVälj: ", end="")
+                        break
+                    except ValueError: #Checks for Value errors
+                        print("Ange en kanal som finns!\n")
+                        continue
+            elif inputNumber == 2:
+                currentTv.sankVolym()
+            elif inputNumber == 3:
+                currentTv.hojVolym()
+            elif inputNumber == 4:
+                mainMenu()
+            else:
+                print("Välj ett nummer som finns! : ", end="")
                 continue
+            break
 
-def tvInfo(tv):
+def tvInfo(tv): #Displayes Tv chanal and volym
     print("\n\n" + tv.name, "\nKanal:", tv.getKanal(), "\nLjudvolymen:", tv.getVolym())
 
-
-def saveSettings():
+def saveSettings(): #Saves settings into settings txt
     f = open("settings.txt", "w+")
-    f.write(vardag.getName() + "," + str(vardag.getKanal()) + "," +  str(vardag.getVolym()) + ",")
-    f.write(kok.getName() + "," + str(kok.getKanal()) + "," +  str(kok.getVolym())) 
+    f.write(vardag.getName() + "," + str(vardag.getKanal()) + "," +  str(vardag.getVolym()) + "," + kok.getName() + "," + str(kok.getKanal()) + "," +  str(kok.getVolym()))
     f.close()
 
-main()
+mainMenu()
