@@ -33,7 +33,7 @@ def mainMenu():
             print("Välj ett nummer som finns! : ", end="")
             continue
 
-def secMenu(currentTv): #Handels the second menu
+def secMenu(currentTv): #Handles the second menu
     inputNumber = 0
     while inputNumber != 4: #The menu runs as long as you dont input "4"
         tvInfo(currentTv)
@@ -64,10 +64,10 @@ def secMenu(currentTv): #Handels the second menu
                 currentTv.hojVolym()
             elif inputNumber == 4:
                 mainMenu()
+                break
             else:
                 print("Välj ett nummer som finns! : ", end="")
                 continue
-            break
 
 def tvInfo(tv): #Displayes Tv chanal and volym
     print("\n\n" + tv.name, "\nKanal:", tv.getKanal(), "\nLjudvolymen:", tv.getVolym())
