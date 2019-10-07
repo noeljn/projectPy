@@ -4,7 +4,8 @@ class Tile:
         self.gridPosition = [x,y]
         self.minesNear = 0
         self.mined = False
-        self.Open = False
+        self.open = False
+        self.flaged = False
         self.adjacentCords = [[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]]
         self.adjacentTiles = [] 
 
@@ -14,11 +15,11 @@ class Tile:
     def Mined(self):
         return self.mined
 
-    def OpenMine(self):
-        self.Open = True
+    def OpenTile(self):
+        self.open = True
     
     def Opened(self):
-        return self.Open
+        return self.open
 
     def MinesNear(self):
         for tile in self.adjacentTiles:
@@ -26,7 +27,7 @@ class Tile:
                 self.minesNear += 1
 
     def __str__(self):
-        if self.Open == False:
+        if self.open == False:
             return  str(self.gridPosition[0]) + str(self.gridPosition[1])
         elif self.mined:
             return "M "
