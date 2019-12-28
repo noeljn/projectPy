@@ -1,26 +1,38 @@
 import Tile
 import random
+import math
 
-class TileGrid():
+class TileGrid:
     def __init__(self, size_x, size_y, mines):
         self.size = [size_x, size_y]
         self.allTiles = []
         self.mines = mines
+        self.tileSize = 20
+        self.minesGenerated = False
 
-    def ClickTile(self, cord):
+    def Click(self, cord):
         tile = self.GetTile(cord)
-        if tile.open == False and tile.flaged == False:
+        if not self.minesGenerated and not tile.Flaged():
+            self.GenerateMines(tile)
+            self.minesGenerated = True
+        elif not tile.Opened() and not tile.Flaged() and not tile.Mined():
             self.Flood(tile)
+        elif not tile.Flaged() and tile.Mined():
+            self.Lose()
 
+    def FlagTile(self, cord):
+        tile = self.GetTile(cord)
+        if self.minesGenerated and not tile.Opened():
+            tile.Flag()
                 
     def LoadGrid(self):
         for x in range(self.size[0]):
             for y in range(self.size[1]):
                 self.allTiles.append(Tile.Tile(x,y))
     
-    def GenerateMines(self, cord):
+    def GenerateMines(self, tile):
         ##Find the all the safe Tiles
-        safeTile = self.GetTile(cord)
+        safeTile = tile
         lista = []
         for tile in safeTile.adjacentTiles:
             lista.append(tile)
@@ -47,12 +59,6 @@ class TileGrid():
         self.CheckMinesNear()
         self.Flood(safeTile)
             
-    def __str__(self): #Returns the board of mines
-        string = " "
-        for y in range(self.size[1]):
-            string += "\n"
-            string += " ".join(str(self.allTiles[x]) for x in range(y*self.size[0], y*self.size[0] + self.size[0]))
-        return string
 
     def addAdjacentTiles(self): #Adds the tiles around a tile to the list -> adjacentTiles
         for t in self.allTiles:
@@ -91,22 +97,19 @@ class TileGrid():
         win = True
         return win
 
-    def RevealTiles(self):
-        for tile in self.allTiles:
-            tile.OpenTile()
-    
     def GetTile(self, cord): #Get a tile by its position in the xy - plane
-        cord = str(cord).strip()
+        pos = []
+        pos.append(int(math.floor(cord[0]/self.tileSize)))
+        pos.append(int(math.floor(cord[1]/self.tileSize)))
         for t in self.allTiles:
-            if "Tile_{}_{}".format(cord[0], cord[1]) == t.name:
+            if "Tile_{}_{}".format(pos[0], pos[1]) == t.name:
                 return t
 
-    def CheckInput(self, cord): #Checks if input from user is valid
-        try:
-            cord = str(cord).strip()
-            for t in self.allTiles:
-                if "Tile_{}_{}".format(cord[0], cord[1]) == t.name:
-                    return False
-            return True
-        except:
-            return True
+    def Draw(self, canvas):
+        for tile in self.allTiles:
+            tile.Draw(canvas)
+
+    def Lose(self):
+        for t in self.allTiles:
+            t.OpenTile()
+        print("You suck!")
