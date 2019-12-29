@@ -2,12 +2,15 @@ import Tile
 import random
 import math
 
+pygame.font.init()
+font = pygame.font.SysFont('Comic Sans MS', 30)
+
 class TileGrid:
     def __init__(self, size_x, size_y, mines):
         self.size = [size_x, size_y]
         self.allTiles = []
         self.mines = mines
-        self.tileSize = 20
+        self.tileSize = 20 #in pixels
         self.minesGenerated = False
 
     def Click(self, cord):
@@ -87,15 +90,12 @@ class TileGrid:
 
     #Returns False if you lose and True if you win, and 0 if neither
     def CheckWin(self): #Checks if all Tiles that shoud be open are and that all mines are not open
-        win = 0
         for tile in self.allTiles:
-            if tile.mined and tile.open:
-                win = False
-                return win
-            elif tile.mined == False and tile.open == False:
-                return win
-        win = True
-        return win
+            if not tile.Mined() and not tile.Opened():
+                return False
+            elif tile.Mined() and not tile.Flaged():
+                return False
+            return True
 
     def GetTile(self, cord): #Get a tile by its position in the xy - plane
         pos = []
@@ -111,4 +111,9 @@ class TileGrid:
     def Lose(self):
         for t in self.allTiles:
             t.OpenTile()
+        textsurface = myfont.render('Some Text', False, (0, 0, 0)) ## Print Some Text
+
         print("You suck!")
+
+    def Win(self, canvas):
+        print("You won!") # Add som text

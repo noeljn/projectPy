@@ -12,6 +12,7 @@ pygame.display.set_caption("MineSweeper")
 class State:
     running = True
     win = False
+    board = True
 
 def StartGame():
     tile_grid.LoadGrid()
@@ -27,7 +28,8 @@ def Main(state):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 state.running = False
-            if event.type == pygame.MOUSEBUTTONDOWN and state.running:
+
+            if event.type == pygame.MOUSEBUTTONDOWN and state.running and not state.win and state.board:
                 if pygame.mouse.get_pressed()[0]: #Check first position in tupler to see if left click was pressed
                     mousePos = pygame.mouse.get_pos()
                     tile_grid.Click(mousePos)
@@ -36,7 +38,14 @@ def Main(state):
                     tile_grid.FlagTile(mousePos)
                 tile_grid.Draw(canvas)
                 pygame.display.flip()
-                
+                if tile_grid.CheckWin():
+                    state.win = True
+
+            if state.win and state.board:
+                state.board = False
+                tile_grid.Win(canvas)
+
+
 
 
 StartGame()
