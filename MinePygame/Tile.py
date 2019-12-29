@@ -2,7 +2,6 @@ import pygame
 
 class Tile:
     def __init__(self, x, y):
-        self.name = "Tile_{}_{}".format(x,y)
         self.gridPosition = [x,y]
         self.minesNear = 0
         self.mined = False
@@ -29,7 +28,7 @@ class Tile:
     def Mined(self):
         return self.mined
 
-    def OpenTile(self):
+    def OpenTile(self): #Its a little long, I dont like it
         self.open = True
         if self.mined: #Bad switch statment to change picture
             self.image = pygame.transform.scale((pygame.image.load('Resources\mine.png')), (self.size[0], self.size[1]))
@@ -58,6 +57,5 @@ class Tile:
 
     def Draw(self, canvas):
         canvas.blit(self.image, (self.gridPosition[0] * 20, self.gridPosition[1] * 20))
-        #pygame.draw.rect(canvas, self.color, self.rect)  
 
     

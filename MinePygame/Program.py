@@ -17,7 +17,6 @@ def StartGame():
     tile_grid.LoadGrid()
     tile_grid.addAdjacentTiles()
     tile_grid.Draw(canvas)
-    #pygame.display.update()
     pygame.display.flip()   
     state = State()
     Main(state)

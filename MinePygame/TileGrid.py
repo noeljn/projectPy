@@ -26,12 +26,12 @@ class TileGrid:
             tile.Flag()
                 
     def LoadGrid(self):
-        for x in range(self.size[0]):
-            for y in range(self.size[1]):
+        for y in range(self.size[0]):
+            for x in range(self.size[1]):
                 self.allTiles.append(Tile.Tile(x,y))
     
     def GenerateMines(self, tile):
-        ##Find the all the safe Tiles
+        #Starting tile and all tiles around it should be a save-tile
         safeTile = tile
         lista = []
         for tile in safeTile.adjacentTiles:
@@ -43,15 +43,14 @@ class TileGrid:
         while(i < self.mines):
             i+=1
             cord = [random.randint(0, self.size[0] - 1), random.randint(0, self.size[1] - 1)]
-            cord = "Tile_{}_{}".format(cord[0], cord[1])
             self.check = True
             for tile in lista: #Checks if cord already is mined or is a safeTile
-                if tile.name == cord:
+                if tile.gridPosition == cord:
                     self.check = False
                     i+=-1
             if self.check:
                 for t in self.allTiles: #Mines the Tile and adds the Tile to the list of safeTiles
-                    if t.name == cord:
+                    if t.gridPosition == cord:
                         t.Mine()
                         lista.append(t)
         #After all mines have been placed we want all Tiles to check how many tiles there are around them
@@ -64,7 +63,7 @@ class TileGrid:
         for t in self.allTiles:
             for cord in t.adjacentCords:
                 for tile in self.allTiles:
-                    if tile.name == "Tile_{}_{}".format(cord[0] + t.gridPosition[0], cord[1] + t.gridPosition[1]):
+                    if tile.gridPosition == [(cord[0] + t.gridPosition[0]), (cord[1] + t.gridPosition[1])]:
                         t.adjacentTiles.append(tile)
 
     def CheckMinesNear(self):
@@ -85,6 +84,7 @@ class TileGrid:
                     stack.append(t)
                 if t.mined == False:
                     t.OpenTile()
+
     #Returns False if you lose and True if you win, and 0 if neither
     def CheckWin(self): #Checks if all Tiles that shoud be open are and that all mines are not open
         win = 0
@@ -101,9 +101,8 @@ class TileGrid:
         pos = []
         pos.append(int(math.floor(cord[0]/self.tileSize)))
         pos.append(int(math.floor(cord[1]/self.tileSize)))
-        for t in self.allTiles:
-            if "Tile_{}_{}".format(pos[0], pos[1]) == t.name:
-                return t
+
+        return self.allTiles[pos[0] + pos[1]*self.size[0]] #Returns the tile with given cord
 
     def Draw(self, canvas):
         for tile in self.allTiles:
