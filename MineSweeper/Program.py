@@ -36,16 +36,7 @@ def game():
             except:
                 print("Enter correct cord: ", end="")
                 continue
-        tile_grid.ClickTile(inp)
-        if tile_grid.CheckWin() == True:
-            tile_grid.RevealTiles()
-            print(tile_grid)
-            print("Wow You Won!")
-            break
-        elif tile_grid.CheckWin() == False:
-            print(tile_grid)
-            print("You Lost!")
-            break       
+        tile_grid.ClickTile(inp)    
 
 
 main()

@@ -56,6 +56,6 @@ class Tile:
                 self.minesNear += 1
 
     def Draw(self, canvas):
-        canvas.blit(self.image, (self.gridPosition[0] * 20, self.gridPosition[1] * 20))
+        canvas.blit(self.image, (self.gridPosition[0] * self.size[0], self.gridPosition[1] * self.size[1]))
 
     

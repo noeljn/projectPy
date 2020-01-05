@@ -1,32 +1,41 @@
 import Tile
 import random
 import math
+import pygame
 
 pygame.font.init()
-font = pygame.font.SysFont('Comic Sans MS', 30)
+myfont = pygame.font.SysFont('Comic Sans MS', 10)
 
 class TileGrid:
     def __init__(self, size_x, size_y, mines):
         self.size = [size_x, size_y]
         self.allTiles = []
         self.mines = mines
+        self.flagedMines = 0
         self.tileSize = 20 #in pixels
         self.minesGenerated = False
 
-    def Click(self, cord):
+    def Click(self, cord, canvas):
         tile = self.GetTile(cord)
-        if not self.minesGenerated and not tile.Flaged():
-            self.GenerateMines(tile)
-            self.minesGenerated = True
-        elif not tile.Opened() and not tile.Flaged() and not tile.Mined():
-            self.Flood(tile)
-        elif not tile.Flaged() and tile.Mined():
-            self.Lose()
+        if not tile == None:
+            if not self.minesGenerated and not tile.Flaged():
+                self.GenerateMines(tile)
+                self.minesGenerated = True
+            elif not tile.Opened() and not tile.Flaged() and not tile.Mined():
+                self.Flood(tile)
+            elif not tile.Flaged() and tile.Mined():
+                self.Lose(canvas)
 
     def FlagTile(self, cord):
         tile = self.GetTile(cord)
-        if self.minesGenerated and not tile.Opened():
-            tile.Flag()
+        if not tile == None:
+            if self.minesGenerated and not tile.Opened():
+                tile.Flag()
+            if tile.Flaged():
+                self.flagedMines -= 1
+            else:
+                self.flagedMines += 1
+
                 
     def LoadGrid(self):
         for y in range(self.size[0]):
@@ -88,32 +97,49 @@ class TileGrid:
                 if t.mined == False:
                     t.OpenTile()
 
-    #Returns False if you lose and True if you win, and 0 if neither
-    def CheckWin(self): #Checks if all Tiles that shoud be open are and that all mines are not open
-        for tile in self.allTiles:
-            if not tile.Mined() and not tile.Opened():
-                return False
-            elif tile.Mined() and not tile.Flaged():
-                return False
+    def CheckWin(self): #You can win in two ways, if all mines are flaged or if all tiles that are not mines are open
+        win = True #Checks if all mines are flaged
+        secWin = True #Checks if all tiles that are not mines are open
+        for t in self.allTiles:
+            if t.Mined() and t.Opened():
+                win = False
+                secWin = False
+            if not t.Mined() and not t.Opened():
+                secWin = False
+            if t.Mined() and not t.Flaged():
+                win = False
+        if win or secWin:
             return True
+        else: 
+            return False
 
     def GetTile(self, cord): #Get a tile by its position in the xy - plane
         pos = []
         pos.append(int(math.floor(cord[0]/self.tileSize)))
         pos.append(int(math.floor(cord[1]/self.tileSize)))
-
-        return self.allTiles[pos[0] + pos[1]*self.size[0]] #Returns the tile with given cord
+        if pos[0] > self.size[0] - 1 or pos[1] > self.size[1] - 1: #Check that the click is within the board
+            return None
+        else:
+            return self.allTiles[pos[0] + pos[1]*self.size[0]] #Returns the tile with given cord
 
     def Draw(self, canvas):
         for tile in self.allTiles:
             tile.Draw(canvas)
 
-    def Lose(self):
+    def Lose(self, canvas):
+        minesFlaged = 0
         for t in self.allTiles:
             t.OpenTile()
-        textsurface = myfont.render('Some Text', False, (0, 0, 0)) ## Print Some Text
-
-        print("You suck!")
+            if t.Mined() and t.Flaged():
+                minesFlaged += 1
+        
+        self.Write(100, 225, 'You Lost! Mines Correctly Flaged: ' + str(minesFlaged), canvas)
 
     def Win(self, canvas):
-        print("You won!") # Add som text
+        self.Write(100, 225, 'You Won! Congratulations!', canvas)
+    
+    def Write(self, x, y, text, canvas):
+        textsurface = myfont.render(text, False, (0, 255, 0))
+        rect = textsurface.get_rect()
+        rect.center = (x, y)
+        canvas.blit(textsurface, rect)
