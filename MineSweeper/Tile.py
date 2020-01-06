@@ -33,10 +33,10 @@ class Tile:
 
     def __str__(self):
         if self.flaged:
-            return "F "
+            return "F"
         elif self.open == False:
-            return  str(self.gridPosition[0]) + str(self.gridPosition[1])
+            return  "*"
         elif self.mined:
-            return "M "
+            return "M"
         else:
-            return str(self.minesNear) + " "
+            return str(self.minesNear)

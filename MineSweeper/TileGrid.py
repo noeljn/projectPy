@@ -21,7 +21,7 @@ class TileGrid():
     def getExit(self): #Returns exit
         return self.exit
 
-    def flagTile(self, cord):
+    def flagTile(self, cord): #Checks if the tile is closed or open and flags if, in the case its closed
         tile = self.getTile(cord)
         if tile.getFlaged() and not tile.getOpened():
             self.flagedMines -= 1
@@ -30,8 +30,7 @@ class TileGrid():
             self.flagedMines += 1
             tile.flag()
         
-    
-    def getMinesRemaining(self):
+    def getMinesRemaining(self): #Returns the amount of flags that should be left
         return self.mines - self.flagedMines
 
     def click(self, cord): #If its the first click you generate the mines and start the timer otherwise you flood that tile
@@ -80,13 +79,6 @@ class TileGrid():
         #Then Flood on the starting Tile
         self.checkMinesNear()
         self.flood(safeTile)
-            
-    def __str__(self): #Returns the board of mines
-        string = " "
-        for y in range(self.size[1]):
-            string += "\n"
-            string += " ".join(str(self.allTiles[x]) for x in range(y*self.size[0], y*self.size[0] + self.size[0]))
-        return string
 
     def addAdjacentTiles(self): #Adds the tiles around a tile to the list -> adjacentTiles
         for t in self.allTiles:
@@ -123,17 +115,20 @@ class TileGrid():
  
     def save(self): #Calculates points and time then saves it all in a top 10 list
         self.stopTimer = timer()
-        points = 0
+        points = self.mines
+        flagsPlacedCorrectly = 0
         for t in self.allTiles:
             if t.getMined() and t.getFlaged():
-                points += 1
+                flagsPlacedCorrectly += 1
+            if t.getMined() and t.getOpened():
+                points -= 1
         finalTime = round((self.stopTimer - self.startTimer), 2)
-        print("\n\nYour final time was: " + str(finalTime) + "s\nYou placed " + str(points) + " correct flags!")
+        print("\n\nYour final time was: " + str(finalTime) + "s\nYou placed " + str(flagsPlacedCorrectly) + " correct flags!\nYou got " + str(points) + " points!")
 
-        with open("toplista.txt", "a+") as f:
+        with open("toplista.txt", "a+") as f: #Adds the new score
             f.write(f"{points},{finalTime}\n")
 
-        with open("toplista.txt", "r") as f:
+        with open("toplista.txt", "r") as f: #Sorts the new top 10
             content = f.readlines()
             array = []
             for r in content:
@@ -143,8 +138,9 @@ class TileGrid():
 
             array = sorted(array, key = lambda x: (x[1]))
             array = sorted(array, key = lambda x: (x[0]), reverse = True)
-        os.remove("toplista.txt")
-        with open("toplista.txt", "w+") as f:
+
+        os.remove("toplista.txt") #Takes away the old list
+        with open("toplista.txt", "w+") as f: #Adds the new top 10 list
             count = 0
             print("\nToplista")
             for i in array:
@@ -154,19 +150,37 @@ class TileGrid():
                 print(str(count) + ". Points:",i[0],"| Final Time:" , i[1])
                 f.write(f"{i[0]},{i[1]}\n")
 
-        
-        
-
-
     def getTile(self, cord): #Get a tile by its position in the xy - plane
         return self.allTiles[cord[0] + cord[1]*self.size[0]]
 
-    def getCord(self, cord): #Checks if input from user is valid
+    def checkWin(self): #You can win in 2 ways, one all and only mines are flaged or all tiles that are not mines are open
+        openWin = True
+        flagWin = True
+        for t in self.allTiles:
+            if not t.getMined() and not t.getOpened():
+                openWin = False
+            if not t.getMined() and t.getFlaged():
+                flagWin = False
+            if t.getMined and not t.getFlaged():
+                flagWin = False
+        if openWin or flagWin:
+            self.exit = True
+            self.save()
+
+    def getCord(self, cord): #Checks if cord given by user is a real tile
         cord = str(cord).strip()
         pos = []
         pos.append(int(cord[0]))
         pos.append(int(cord[1]))
-        if pos[0] > self.size[0] - 1 and pos[1] > self.size[1] - 1:
+        if pos[0] > self.size[0] - 1 or pos[1] > self.size[1] - 1:
             return None
         else:
             return pos
+
+    def __str__(self): #Returns the board
+        string = "\n[ ]"
+        string += "".join([("[" + str(x) + "]") for x in range(self.size[0])])
+        for y in range(self.size[1]):
+            string += "\n[" + str(y) + "] " 
+            string += "  ".join(str(self.allTiles[x]) for x in range(y*self.size[0], y*self.size[0] + self.size[0])) #Creates a list of all tiles in a line then joins them in a string
+        return string
