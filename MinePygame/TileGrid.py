@@ -133,10 +133,10 @@ class TileGrid:
             if t.Mined() and t.Flaged():
                 minesFlaged += 1
         
-        self.Write(100, 225, 'You Lost! Mines Correctly Flaged: ' + str(minesFlaged), canvas)
+        self.Write(self.size[0]*self.tileSize, self.size[1]*self.tileSize, 'You Lost! Mines Correctly Flaged: ' + str(minesFlaged), canvas)
 
     def Win(self, canvas):
-        self.Write(100, 225, 'You Won! Congratulations!', canvas)
+        self.Write(self.size[0]*self.tileSize, self.size[1]*self.tileSize, 'You Won! Congratulations!', canvas)
     
     def Write(self, x, y, text, canvas):
         textsurface = myfont.render(text, False, (0, 255, 0))

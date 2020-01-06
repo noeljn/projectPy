@@ -2,10 +2,10 @@ import Tile
 import TileGrid
 import pygame
 
-board = [10,10]
+board = [24,24]
 mines = 10
 tile_grid = TileGrid.TileGrid(board[0],board[1],mines)
-canvas = pygame.display.set_mode((board[0]*20 + 50, board[1]*20 + 50))
+canvas = pygame.display.set_mode((board[0]*20, board[1]*20))
 pygame.display.set_caption("MineSweeper")
 
 

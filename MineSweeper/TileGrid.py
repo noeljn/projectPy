@@ -1,26 +1,61 @@
 import Tile
 import random
+import math
+import os
+from timeit import default_timer as timer
 
 class TileGrid():
-    def __init__(self, size_x, size_y, mines):
+    def __init__(self, size_x = None, size_y = None, mines = None): #Size and mines
         self.size = [size_x, size_y]
         self.allTiles = []
         self.mines = mines
+        self.exit = False
+        self.flagedMines = 0
+        self.startTimer = 0
+        self.stopTimer = 0
+        self.minesGenerated = False
+    
+    def exitProgram(self): #sets exit to True
+        self.exit = True
 
-    def ClickTile(self, cord):
-        tile = self.GetTile(cord)
-        if tile.open == False and tile.flaged == False:
-            self.Flood(tile)
+    def getExit(self): #Returns exit
+        return self.exit
+
+    def flagTile(self, cord):
+        tile = self.getTile(cord)
+        if tile.getFlaged() and not tile.getOpened():
+            self.flagedMines -= 1
+            tile.flag()
+        elif not tile.getOpened():
+            self.flagedMines += 1
+            tile.flag()
+        
+    
+    def getMinesRemaining(self):
+        return self.mines - self.flagedMines
+
+    def click(self, cord): #If its the first click you generate the mines and start the timer otherwise you flood that tile
+        tile = self.getTile(cord)
+        if not self.minesGenerated and not tile.getFlaged():
+            self.startTimer = timer()
+            self.generateMines(tile)
+            self.minesGenerated = True
+        elif not tile.getOpened() and not tile.getMined() and not tile.getFlaged():
+            self.flood(tile)
+        elif tile.getMined() and not tile.getFlaged():
+            self.lose()
 
                 
-    def LoadGrid(self):
-        for x in range(self.size[0]):
-            for y in range(self.size[1]):
+    def loadGrid(self, size_x, size_y, mines): #Creates the tiles
+        self.size = [size_x, size_y]
+        self.mines = mines
+        for y in range(self.size[0]):
+            for x in range(self.size[1]):
                 self.allTiles.append(Tile.Tile(x,y))
     
-    def GenerateMines(self, cord):
-        ##Find the all the safe Tiles
-        safeTile = self.GetTile(cord)
+    def generateMines(self, tile):
+        #Starting tile and all tiles around it should be a save-tile
+        safeTile = tile
         lista = []
         for tile in safeTile.adjacentTiles:
             lista.append(tile)
@@ -31,21 +66,20 @@ class TileGrid():
         while(i < self.mines):
             i+=1
             cord = [random.randint(0, self.size[0] - 1), random.randint(0, self.size[1] - 1)]
-            cord = "Tile_{}_{}".format(cord[0], cord[1])
             self.check = True
             for tile in lista: #Checks if cord already is mined or is a safeTile
-                if tile.name == cord:
+                if tile.gridPosition == cord:
                     self.check = False
                     i+=-1
             if self.check:
                 for t in self.allTiles: #Mines the Tile and adds the Tile to the list of safeTiles
-                    if t.name == cord:
-                        t.Mine()
+                    if t.gridPosition == cord:
+                        t.mine()
                         lista.append(t)
         #After all mines have been placed we want all Tiles to check how many tiles there are around them
         #Then Flood on the starting Tile
-        self.CheckMinesNear()
-        self.Flood(safeTile)
+        self.checkMinesNear()
+        self.flood(safeTile)
             
     def __str__(self): #Returns the board of mines
         string = " "
@@ -58,19 +92,20 @@ class TileGrid():
         for t in self.allTiles:
             for cord in t.adjacentCords:
                 for tile in self.allTiles:
-                    if tile.name == "Tile_{}_{}".format(cord[0] + t.gridPosition[0], cord[1] + t.gridPosition[1]):
+                    if tile.gridPosition == [(cord[0] + t.gridPosition[0]), (cord[1] + t.gridPosition[1])]:
                         t.adjacentTiles.append(tile)
 
-    def CheckMinesNear(self):
-        for tile in self.allTiles:
-            tile.MinesNear()
 
-    def Flood(self, startTile):
+    def checkMinesNear(self): #Tells all tiles to check how many mines are near them
+        for tile in self.allTiles:
+            tile.addMinesNear()
+
+    def flood(self, startTile): #Opens all tiles that are in connection with the tile that was click, if that tile has no mines near
         stack = [] #Budget stack
 
         if(startTile.minesNear == 0):
             stack.append(startTile)
-        startTile.OpenTile()
+        startTile.openTile()
 
         while len(stack) > 0 :
             currentTile = stack.pop()
@@ -78,35 +113,60 @@ class TileGrid():
                 if t.minesNear == 0 and t.mined == False and t.open == False:
                     stack.append(t)
                 if t.mined == False:
-                    t.OpenTile()
-    #Returns False if you lose and True if you win, and 0 if neither
-    def CheckWin(self): #Checks if all Tiles that shoud be open are and that all mines are not open
-        win = 0
-        for tile in self.allTiles:
-            if tile.mined and tile.open:
-                win = False
-                return win
-            elif tile.mined == False and tile.open == False:
-                return win
-        win = True
-        return win
+                    t.openTile()
 
-    def RevealTiles(self):
+    def lose(self): #All tiles are reveald and calls for save
         for tile in self.allTiles:
-            tile.OpenTile()
-    
-    def GetTile(self, cord): #Get a tile by its position in the xy - plane
-        cord = str(cord).strip()
+            tile.openTile()
+        self.exit = True
+        self.save()
+ 
+    def save(self): #Calculates points and time then saves it all in a top 10 list
+        self.stopTimer = timer()
+        points = 0
         for t in self.allTiles:
-            if "Tile_{}_{}".format(cord[0], cord[1]) == t.name:
-                return t
+            if t.getMined() and t.getFlaged():
+                points += 1
+        finalTime = round((self.stopTimer - self.startTimer), 2)
+        print("\n\nYour final time was: " + str(finalTime) + "s\nYou placed " + str(points) + " correct flags!")
 
-    def CheckInput(self, cord): #Checks if input from user is valid
-        try:
-            cord = str(cord).strip()
-            for t in self.allTiles:
-                if "Tile_{}_{}".format(cord[0], cord[1]) == t.name:
-                    return False
-            return True
-        except:
-            return True
+        with open("toplista.txt", "a+") as f:
+            f.write(f"{points},{finalTime}\n")
+
+        with open("toplista.txt", "r") as f:
+            content = f.readlines()
+            array = []
+            for r in content:
+                tempContent = r.strip("\n")
+                tempContent = tempContent.split(",")
+                array.append(tempContent)
+
+            array = sorted(array, key = lambda x: (x[1]))
+            array = sorted(array, key = lambda x: (x[0]), reverse = True)
+        os.remove("toplista.txt")
+        with open("toplista.txt", "w+") as f:
+            count = 0
+            print("\nToplista")
+            for i in array:
+                count += 1
+                if count > 10:
+                    break
+                print(str(count) + ". Points:",i[0],"| Final Time:" , i[1])
+                f.write(f"{i[0]},{i[1]}\n")
+
+        
+        
+
+
+    def getTile(self, cord): #Get a tile by its position in the xy - plane
+        return self.allTiles[cord[0] + cord[1]*self.size[0]]
+
+    def getCord(self, cord): #Checks if input from user is valid
+        cord = str(cord).strip()
+        pos = []
+        pos.append(int(cord[0]))
+        pos.append(int(cord[1]))
+        if pos[0] > self.size[0] - 1 and pos[1] > self.size[1] - 1:
+            return None
+        else:
+            return pos
